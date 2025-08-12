@@ -27,7 +27,7 @@ It is designed to be **cross-platform**, running on any system with a Java Runti
 1. Clone the repository:
    ```bash
    git clone https://github.com/innaesim/backup_utility.git
-````
+   ```
 
 2. Compile the Java source files:
 
