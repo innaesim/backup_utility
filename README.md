@@ -11,7 +11,7 @@ It is designed to be **cross-platform**, running on any system with a Java Runti
 ## Features
 
 - Supports **PostgreSQL** and **MySQL**
-- Works on **Windows**, **Linux**, and **macOS**
+- Works on **Linux**, and **macOS**
 - Simple configuration for database credentials and backup paths
 - Generates timestamped backup files for easy management
 - Lightweight — no heavy frameworks required
@@ -20,6 +20,7 @@ It is designed to be **cross-platform**, running on any system with a Java Runti
 
 - **Java 8** or higher
 - PostgreSQL or MySQL client tools installed and available in system PATH
+- pg_dump or mysqldumb tools installed and available in system PATH
 - Access credentials for the target database(s)
 
 ## Usage
