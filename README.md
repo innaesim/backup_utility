@@ -29,19 +29,19 @@ It is designed to be **cross-platform**, running on any system with a Java Runti
    git clone https://github.com/innaesim/backup_utility.git
    ```
 
-2. Compile the Java source files:
+2. Package the utility into a jar file:
 
    ```bash
-   javac -d out src/**/*.java
+   mvn package
    ```
 
 3. Run the utility:
 
    ```bash
-   java -cp out com.example.BackupUtility
+   java -jar target/backup-utility.jar
    ```
 
-4. Configure database connection settings in the provided configuration file or within the program.
+4. Enter database connection settings when prompted.
 
 ## Example Backup Output
 
