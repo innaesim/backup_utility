@@ -18,7 +18,7 @@ It is designed to be **cross-platform**, running on any system with a Java Runti
 
 ## Requirements
 
-- **Java 8** or higher
+- **Java 17**
 - PostgreSQL or MySQL client tools installed and available in system PATH
 - pg_dump or mysqldumb tools installed and available in system PATH
 - Access credentials for the target database(s)
