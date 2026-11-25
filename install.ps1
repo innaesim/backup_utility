@@ -50,7 +50,10 @@ function Confirm-Step([string]$Question) {
     return $answer -match '^(y|yes)$'
 }
 
+# Windows PowerShell turns redirected native stderr into a terminating error under 'Stop', and
+# schtasks writes there when the task doesn't exist, so these functions rely on the exit code instead.
 function Test-ServiceEnabled {
+    $ErrorActionPreference = 'Continue'
     & schtasks.exe /Query /TN $TaskName *> $null
     return $LASTEXITCODE -eq 0
 }
@@ -84,6 +87,7 @@ function Update-SessionPath {
 
 # Without inheritance and with only this user, the file matches chmod 600.
 function Set-OwnerOnly([string]$Path) {
+    $ErrorActionPreference = 'Continue'
     & icacls.exe $Path /inheritance:r /grant:r "$($env:USERNAME):(F)" *> $null
     if ($LASTEXITCODE -ne 0) { Write-Warning "Couldn't restrict access to $Path" }
 }
