@@ -1,4 +1,4 @@
-# Java Database Backup Utility
+# Java Backup Utility
 
 Back up and restore **PostgreSQL**, **MySQL** and **MongoDB** databases, and **folders**, on demand or on a schedule. Backups can be pushed to FTP, SFTP, S3-compatible storage or Azure Blob Storage, cleaned up by a retention policy, and reported to Slack.
 
