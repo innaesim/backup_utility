@@ -293,44 +293,44 @@ public final class FolderArchiver {
         List<Path> directoryPaths = new ArrayList<>();
         int files = 0;
 
-        TarArchiveInputStream tar = new TarArchiveInputStream(in, StandardCharsets.UTF_8.name());
-        TarArchiveEntry entry;
-        while ((entry = tar.getNextEntry()) != null) {
-            List<String> parts = safeParts(entry.getName());
-            if (parts.isEmpty()) continue;
-            Path dest = root;
-            for (String part : parts) dest = dest.resolve(part);
-            if (!dest.normalize().startsWith(root)) throw new IOException("Archive entry '" + entry.getName() + "' points outside the restore folder");
+        try (TarArchiveInputStream tar = new TarArchiveInputStream(in, StandardCharsets.UTF_8.name())) {
+            TarArchiveEntry entry;
+            while ((entry = tar.getNextEntry()) != null) {
+                List<String> parts = safeParts(entry.getName());
+                if (parts.isEmpty()) continue;
+                Path dest = root;
+                for (String part : parts) dest = dest.resolve(part);
+                if (!dest.normalize().startsWith(root)) throw new IOException("Archive entry '" + entry.getName() + "' points outside the restore folder");
 
-            if (entry.isDirectory()) {
-                makeDirectories(root, parts);
-                directories.add(entry);
-                directoryPaths.add(dest);
-                continue;
-            }
-            makeDirectories(root, parts.subList(0, parts.size() - 1));
-            if (entry.isSymbolicLink()) {
-                try {
-                    Files.createSymbolicLink(dest, Path.of(entry.getLinkName()));
+                if (entry.isDirectory()) {
+                    makeDirectories(root, parts);
+                    directories.add(entry);
+                    directoryPaths.add(dest);
+                    continue;
+                }
+                makeDirectories(root, parts.subList(0, parts.size() - 1));
+                if (entry.isSymbolicLink()) {
+                    try {
+                        Files.createSymbolicLink(dest, Path.of(entry.getLinkName()));
+                        files++;
+                    } catch (UnsupportedOperationException | FileSystemException e) {
+                        if (Files.exists(dest, NOFOLLOW)) throw new IOException("Archive has '" + entry.getName() + "' more than once");
+                        skipped.add(entry.getName() + " (symlink to " + entry.getLinkName() + ": " + reason(e) + ")");
+                    }
+                } else if (entry.isFile()) {
+                    try (OutputStream out = Files.newOutputStream(dest, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                        tar.transferTo(out);
+                    } catch (java.nio.file.FileAlreadyExistsException e) {
+                        throw new IOException("Archive has '" + entry.getName() + "' more than once");
+                    }
+                    Files.setLastModifiedTime(dest, FileTime.from(entry.getModTime().toInstant()));
+                    if (posix) Files.setPosixFilePermissions(dest, fromMode(entry.getMode()));
                     files++;
-                } catch (UnsupportedOperationException | FileSystemException e) {
-                    if (Files.exists(dest, NOFOLLOW)) throw new IOException("Archive has '" + entry.getName() + "' more than once");
-                    skipped.add(entry.getName() + " (symlink to " + entry.getLinkName() + ": " + reason(e) + ")");
+                } else {
+                    skipped.add(entry.getName() + " (not a file, folder or symlink)");
                 }
-            } else if (entry.isFile()) {
-                try (OutputStream out = Files.newOutputStream(dest, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-                    tar.transferTo(out);
-                } catch (java.nio.file.FileAlreadyExistsException e) {
-                    throw new IOException("Archive has '" + entry.getName() + "' more than once");
-                }
-                Files.setLastModifiedTime(dest, FileTime.from(entry.getModTime().toInstant()));
-                if (posix) Files.setPosixFilePermissions(dest, fromMode(entry.getMode()));
-                files++;
-            } else {
-                skipped.add(entry.getName() + " (not a file, folder or symlink)");
             }
         }
-
         // Last, and deepest first, so a read-only folder doesn't block what goes inside it.
         for (int i = directories.size() - 1; i >= 0; i--) {
             Path dir = directoryPaths.get(i);
