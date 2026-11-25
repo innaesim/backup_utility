@@ -1,0 +1,33 @@
+destinations:
+  offsite:
+    type: s3
+    bucket: my-backups
+    region: eu-west-1
+    prefix: db/
+  nas:
+    type: sftp
+    host: nas.local
+    user: backup
+    key_file: ~/.ssh/id_ed25519
+    path: /backups
+notifications:
+  slack:
+    webhook_url: ${SLACK_URL}
+    notify_on: [failure]
+jobs:
+  orders:
+    type: postgresql
+    name: orders
+    user: backup
+    password: ${ORDERS_PW}
+    output_dir: out
+    compress: true
+    schedule: "0 2 * * *"
+    destinations: [offsite, nas]
+    retention:
+      days: 30
+      keep_last: 5
+  catalog:
+    type: mongodb
+    name: catalog
+    output_dir: /var/backups/catalog

@@ -23,3 +23,7 @@
 hs_err_pid*
 replay_pid*
 backups/
+
+# Build output
+target/
+dependency-reduced-pom.xml
